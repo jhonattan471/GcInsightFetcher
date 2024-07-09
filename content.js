@@ -1,6 +1,5 @@
 const originalConsoleLog = console.log;
 
-// Função para obter a data e hora formatadas
 function getFormattedDateTime() {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');
@@ -24,7 +23,6 @@ async function delay(time) {
 }
 
 async function tentarAtePegarValor(func, delay = 1000, tentativas = 30) {
-    console.log("tentando pegar valor...")
     let count = 0;
     let value = null;
     while (!value && count < tentativas) {
@@ -33,7 +31,6 @@ async function tentarAtePegarValor(func, delay = 1000, tentativas = 30) {
         count++;
         await delay(delay);
     }
-    console.log("retornando ", value)
     return value;
 }
 
@@ -65,7 +62,6 @@ function addButtonToRoomCards() {
         button.addEventListener('click', () => {
             const jogadorLinks = card.querySelectorAll('[href^="/jogador/"]');
             if (!jogadorLinks.length) return
-            // [jogadorLinks[0]]
             jogadorLinks.forEach(async link => {
                 const hrefVal = link.getAttribute('href');
                 const idMatch = hrefVal.match(/\/jogador\/(\d+)$/);
@@ -74,7 +70,6 @@ function addButtonToRoomCards() {
             });
         });
 
-        // Adiciona o botão à div RoomCardWrapper
         card.appendChild(button);
     });
 }
@@ -137,12 +132,10 @@ function getPlayerInfo(playerId) {
 
 function setPlayerInfo(player) {
     if (player.ADR) {
-        console.log("ADD DIV ADR")
         addDivToPlayerLink(player.playerId, "ADR", player.ADR)
     }
 
     if (player.KDR) {
-        console.log("ADD DIV KDR")
         addDivToPlayerLink(player.playerId, "KDR", player.KDR)
     }
 
@@ -152,22 +145,22 @@ function setPlayerInfo(player) {
 function processPlayerStats(player) {
     console.log('processing player stats', player)
     if (!player?.partidas) return
-
+    let totalVitorias = 0;
+    let totalDerrotas = 0;
     Object.keys(player.partidas).forEach(game => {
         Object.keys(player.partidas[game]).forEach(grupo => {
             const vitoriasKey = 'vitorias';
             const derrotasKey = 'derrotas';
-            const label = `${game}.${grupo}`;
-            let vitorias = player.partidas[game][grupo][vitoriasKey] || 0
-            let derrotas = player.partidas[game][grupo][derrotasKey] || 0
-            addDivToPlayerLink(player.playerId, label, `v:${vitorias}/d:${derrotas}`);
+            totalVitorias += Number(player.partidas[game][grupo][vitoriasKey] || 0)
+            totalDerrotas += Number(player.partidas[game][grupo][derrotasKey] || 0)
         });
     });
+    addDivToPlayerLink(player.playerId, `vitorias`, totalVitorias);
+    addDivToPlayerLink(player.playerId, `derrotas`, totalDerrotas);
 }
 
 function addDivToPlayerLink(playerId, label, value) {
     console.log("addDivToPlayerLink", playerId, label, value)
-    // Seleciona o elemento <a> com a classe 'LobbyPlayerVertical' e o href especificado
     let playerLink = document.querySelector(`a.LobbyPlayerVertical[href='/jogador/${playerId}']`);
 
     if (playerLink) {
@@ -219,6 +212,6 @@ function getPlayerPartidas() {
             };
         }
     }
-    console.log(partidas)
+
     return partidas;
 }
